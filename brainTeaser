@@ -1,0 +1,90 @@
+#include <iostream>
+#include <cmath> //for pow function
+
+using namespace std;
+
+
+//stack will be used to store the k numbers used for each time we have a success getting n as sums of perfect alpha powers
+class SN
+{
+    public:
+        int content;
+        SN *aNext;
+};
+
+SN *push(int newContent, SN *aHead)
+{
+    SN *newHead=new SN;
+    (*newHead).content=newContent;
+    (*newHead).aNext=aHead;;
+    return newHead;
+}
+
+SN *pop(SN *aHead)
+{
+    if(aHead!=nullptr)
+    {
+        SN *aRunner=aHead;
+        aHead=(*aHead).aNext;
+        (*aRunner).aNext=nullptr;
+        delete aRunner;
+    }
+}
+
+void printStack(SN *aHead)
+{
+    while(aHead!=nullptr)
+    {
+        cout<<(*aHead).content<<" ";
+        aHead=(*aHead).aNext;
+    }
+}
+
+
+//we create a stack globally to hold on to all the different k's for each success
+SN *K=nullptr;
+
+
+void f(int n, int m, int carryAmount=0, int forloopEntries=1)
+{
+    double stop=pow(n, 1.0/m);
+    for(int counter=1; counter<=stop; ++counter)
+    {
+        if(carryAmount+pow(counter, m)==n)
+        { K=push(forloopEntries,K); break;} //every time we hit a success we store in the global stack the number of times we added a perfect alpha power
+        if(carryAmount+pow(counter,m)<n)
+        { f(n,m,carryAmount+pow(counter,m), forloopEntries+1);}
+    }
+}
+
+
+
+
+
+int main()
+{
+    int n, alpha;
+    cout<<"Enter values for n and alpha: ";
+    cin>>n>>alpha;
+    f(n,alpha);
+    int min=(*K).content;
+    
+    
+    //now we search for the minimum value in the global stack
+    SN *aRunner=K;
+    while(aRunner!=nullptr)
+    {
+        if((*aRunner).content<min)
+            min=(*aRunner).content;
+        aRunner=(*aRunner).aNext;
+    }
+    
+    cout<<"k= "<<min<<endl;
+    
+    
+    //we release the memory by deleting the stack
+    while(K!=nullptr)
+        K=pop(K);
+
+    return 0;
+}
