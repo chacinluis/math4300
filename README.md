@@ -8,9 +8,13 @@ For given n and α, determine the smallest number k for which n can be expressed
 # brainteaser_problem2
 
 The user input consists of a positive integer n≥5 and a sequence x1, x2, …, xn−1 of n−1 positive real numbers. 
+
 There are n airports arranged on a straight line. Their names are A0, A1, …, An−1. 
+
 Every two adjacent airports are 100 miles apart.
+
 A small airplane is located at the airport A0 and needs to fly to the airport An−1. Once it takes off, the range of the airplane is 300 miles. 
+
 The landing fee for the airport A1 is x1, the landing fee for A2 is x2, …, the landing fee for the airport An−1 is xn−1. 
 
 
