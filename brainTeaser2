@@ -1,0 +1,126 @@
+#include<iostream>
+using namespace std;
+
+
+
+//definition of the stack
+class SN
+{
+    public:
+        int content;
+        SN *aNext;
+};
+
+
+SN * push(int newContent, SN *aHead)
+{
+    SN *newHead=new SN;
+    (*newHead).content=newContent;
+    (*newHead).aNext=aHead;
+    return newHead;
+}
+
+SN * pop(SN *aHead)
+{
+    if(aHead!=nullptr)
+    {
+        SN *aRunner=aHead;
+        aHead=(*aHead).aNext;
+        delete aRunner;
+        return aHead;
+    }
+}
+
+void deleteStack(SN * &aHead)
+{
+    while(aHead!=nullptr)
+        aHead=pop(aHead);
+}
+
+/*void printStack( SN *aHead)
+{
+    SN *aRunner=aHead;
+    while(aRunner!=nullptr)
+    {
+        cout<<(*aRunner).content<<" ";
+        aRunner=(*aRunner).aNext;
+    }
+}
+*/
+
+
+/*
+We use backtracking with recursion to keep obtain the total fee of every possible combination for the airplane to get to the final destination
+At the beginning start is airport 0. Max is the airport n-1. fees is a pointer pointing to the sequence pointed by feesPtr.
+It stores all of the different fee for each airport. aHead is the head of the totalFees stack. total are the total fees at the
+beginning and therefore 0 by default.
+
+The for loop calls f with an updated total amount depending on the airport the plane landed on. fees[counter] will be the
+respective fee for that airport. Since the airplane can only go only reach at most 3 airports ahead, we put as a condition that
+counter can only go up to 3 units ahead of start+1. Also since we don't want the airplane to go beyond the last airport, we have counter
+also be at most n-1 which is the max.
+
+Every time f is called recursively the end becomes the new start which represents the airplane starting and leaving to a new airport
+
+There will be combinations that fail to reach the last airport, therefore we don't want to consider those total amounts.
+For that reason the if statement only allows total amounts to be added to the stack of totalFees if the airplane reach the 
+the last airport. (i.e is the starting position is already the ending position)
+*/
+
+void f(int start, int max, const int * fees, SN * &aHead, int total=0)
+{
+
+    for(int counter=start+1; (counter<(start+4))&&(counter<=max); ++counter)
+        f(counter, max, fees, aHead, total+fees[counter]);
+    if(start==max)
+        aHead=push(total, aHead);
+}
+
+
+
+
+int main()
+{
+    int n;
+    cout<<"Enter n: ";
+    cin>>n; //we prompt the user to enter n
+    
+    cout<<"Enter a sequence of n-1 integers: ";
+    
+    int *feesPtr=new int[n]; //we create a sequence of size n to hold the fees at each airport
+    feesPtr[0]=0; //we make the Airport where the airplane takes of from to have fee of 0
+
+    for(int counter=1; counter<n;++counter)
+    {
+        cin>>feesPtr[counter]; //we store the sequence provided by the user as the fees for each airport
+    }
+    
+    SN *totalFees=nullptr; 
+    //totalFees will be a stack containing all of the total fess of the different ways 
+    //the airplane can get to the final destination
+    
+    f(0, n-1,feesPtr, totalFees);
+    
+    //out of the function and totalFees now has stored all of the total fees all possible combinations
+    //the plane could have gotten to the final destination
+    
+    
+    //we now move on to find the minimum total feee in the stack
+    SN *aRunner=totalFees; //aRunner will move from stack node to the next comparing each value
+    
+    int min=(*aRunner).content; //we start assuming the minimum total fee is the total fee stored at the top of the stack 
+    aRunner=(*aRunner).aNext;
+    
+    while(aRunner!=nullptr)
+    {
+        if((*aRunner).content<min) //if we encounter a total fee lower than then min we update min to the new lower value
+            min=(*aRunner).content;
+        aRunner=(*aRunner).aNext;
+    }
+    
+    cout<<"Min total fee is: "<<min<<endl; //print minimum total fee
+    deleteStack(totalFees); //we delete the stack and release the memory
+    
+    
+    return 0;
+}
