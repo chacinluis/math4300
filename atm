@@ -1,0 +1,222 @@
+//this is a menu driven program that simulates a bank teller processing requests by a bank customer.
+//the program allows the bank teller to go through several options they would encounter on an ATM.
+
+
+#include<iostream>
+#include<iomanip> //to display dollar amounts with 2 decimals only
+using namespace std;
+
+
+
+//Stack definition with related functions
+
+class SN //It will be used to keep a record of the transactions of a bank account
+{
+	public:
+		double content;
+		SN *aNext;
+};
+
+SN * push(double newContent, SN *aHead) //will be used to add transactions involving deposits and withdrawals
+{
+	SN * aRunner=new SN;
+	(*aRunner).content=newContent;
+	(*aRunner).aNext=aHead;
+	return aRunner;
+}
+
+SN * pop(SN *aHead) //will be used to delete transactions and the stack  of transactions itself in the destructor
+{
+	if(aHead!=NULL)
+	{
+		SN *aRunner=(*aHead).aNext;
+		delete aHead;
+		return aRunner;
+	}
+	return NULL;
+}
+
+void printStack(SN *aHead) //used to print the entire record of transactions
+{
+	cout<<setprecision(2)<<fixed;
+	while(aHead!=NULL)
+	{
+		cout<<(*aHead).content<<endl;
+		aHead=(*aHead).aNext;
+	}
+}
+
+void deleteStack(SN * &aHead) //used in the class destructor to delete the stack of transactions
+{
+	cout<<"Transactions are being deleted\n";
+	while(aHead!=NULL) //we keep on deleting stack nodes until aRunner reaches NULL which is the end of the stack.
+	{
+		SN *aRunner=aHead; //we use aRunner to keep track of the previous node after moving to the following node
+		aHead=(*aHead).aNext; //aHead moves to the next node
+		delete aRunner; //we delete the node pointed to be aRunner
+	}
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//Class Definition
+
+class Account
+{
+	private:
+		double balance;
+		double interest;
+		SN * transactions;
+		double interestRate;
+	
+	public:
+		Account(double=0, double=0.045);
+		double getBalance() const; //accessor displays the balance in the account
+		double getTransactions() const; //accessor displays the number of transactions in the account
+		double getInterestRate() const; //accessor displays the interest rate in the account
+		double getInterest() const; //accessor displays the interest earned
+		
+		double makeWithdrawal(double); //mutator decreases the balance in the bank account
+		double makeDeposit(double); //mutator increases the balance in the bank account by the deposit amount
+		void calcInterest(); //mutator calculates the interest based on current interest rate and balance amount
+		void upDateRate(double); //mutator updates the interest rate for the bank account
+		
+		~Account(); //deletes the stack of transactions
+};
+
+Account::Account(double b, double i)
+{
+	//the constructor sets balance to b, trasactons since it is a pointer it is set to NULL as signal of where the stack
+	//ends, interest is set to 0, and the interest rate is set to i.
+	//since the starting deposit is the first transaction of any bank account, we add the b as the first transaction in our stack
+	balance=b; transactions=NULL; interestRate=i; interest=0;
+	transactions=push(b, transactions);
+}
+
+double Account::getBalance() const
+{
+	return balance;
+}
+double Account::getTransactions() const
+{
+	printStack(transactions); //printStack iterates through every node in the stack and prints its contents.
+}
+
+double Account::getInterestRate() const
+{
+	return interestRate;
+}
+double Account::getInterest() const
+{
+	return interest;
+}
+
+double Account::makeWithdrawal(double w)
+{
+	if(balance-w>=0) //if the funds available are more than the withdrawal amount we disburse the money
+	{
+		balance-=w; //we decrease the amount of funds in the account by the withdrawal amount
+		transactions=push(-w, transactions); //we record the transaction by adding the withdrawal amount to out stack of transactions
+		
+	}
+	else //if the withdrawal is more than the available funds in the account then an error message is displayed
+	{
+		cout<<"Withdrawal failed. No sufficient funds available\n";
+	}
+}
+double Account:: makeDeposit(double d)
+{
+	if(d>0) //if the amount of money is positive we deposit it to the account
+	{
+		balance+=d; //add the deposit amount to the current balance
+		transactions=push(d, transactions); //record the transaction by the adding the desposit amount to our stack.
+	}
+	else //if the deposit amount is not positive than an error message is displayed
+		cout<<"Invalid deposit amount\n";
+}
+void Account::calcInterest()
+{
+	interest=balance*interestRate; //we calculate the interest as a percentage of the current balance
+	balance+=interest; //we add the interest to the balance amount
+	transactions=push(interest, transactions); //we record the transaction in our stack of transactions
+}
+void Account::upDateRate(double r)
+{
+	interestRate=r;
+}
+
+Account::~Account()
+{
+	deleteStack(transactions); 
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+void menu()
+{
+	cout<<"Welcome to the 4300 bank ATM. Choose from the folllwing options: \n";
+	cout<<"1. Make a deposit\n";
+	cout<<"2. Make a withdrawal\n";
+	cout<<"3. Calculate interest\n";
+	cout<<"4. Get balance\n";
+	cout<<"5. Get interest earned\n";
+	cout<<"6. Get interest rate\n";
+	cout<<"7. Get a bank statement\n";
+	cout<<"8. Quit\n";
+	cout<<"Enter option: ";
+}
+
+
+
+
+int main()
+{
+	int choice;
+	Account myAccount;
+	cout<<setprecision(2)<<fixed<<endl; //to keep dollar amounts to two decimal units
+	do //we use a do-while because we want the menu to be displayed at least once
+	{
+		menu(); //menu of options from 1-8 is displayed. The user needs to make a selection
+		cin>>choice; //to save the users choice
+		if(choice==1)
+		{
+			double amount;
+			cout<<"Enter deposit amount: $";
+			cin>>amount;
+			myAccount.makeDeposit(amount);
+		}
+		else if(choice==2)
+		{
+			double amount;
+			cout<<"Enter withdrawal amount: $";
+			cin>>amount;
+			myAccount.makeWithdrawal(amount);
+		}
+		else if(choice==3)
+		{
+			myAccount.calcInterest();
+		}
+		else if(choice==4)
+		{
+			cout<<"$"<<myAccount.getBalance()<<endl;
+		}
+		else if(choice==5)
+		{
+			cout<<"$"<<myAccount.getInterest()<<endl;
+		}
+		else if(choice==6)
+		{
+			cout<<100*myAccount.getInterestRate()<<"%"<<endl;
+		}
+		else
+		{
+			myAccount.getTransactions();
+			cout<<endl<<endl;
+		}
+	}while(choice!=8); //the program finishes executing when the user enters 8
+	
+	return 0; //destructor activates and the saved transactions are deleted.
+	
+}
