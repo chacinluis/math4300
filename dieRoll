@@ -1,0 +1,175 @@
+//This program simulates the roll of a dice and its outcome.
+//It puts the generation of random numbers to practice
+//It also points to difficulties of using an appropriate seed. Using clock time becomes inneffective when
+//the numbers generated take place in an amount of time less than 1 second since the seed has not changed
+//results are saved in a stack as a record of the results.
+
+#include<iostream>
+#include<ctime> //for time function
+#include<cstdlib> //for rand() and srand()
+#include<iomanip>
+using namespace std;
+
+class mySN //we modify the stack class to hold two integers. 
+{
+	public:
+		
+	int sides;
+	int roll;
+	mySN *aNext;
+};
+
+mySN * push(int s, int r, mySN *aHead) //push will be used to add every roll result with the number of sides
+{
+	mySN * newHead=new mySN;
+	(*newHead).sides=s;
+	(*newHead).roll=r;
+	(*newHead).aNext=aHead;
+	return newHead;
+}
+
+mySN * pop(mySN *aHead) //we'll use pop to free the memory used by the stack of all die roll results
+{
+	if(aHead!=NULL)
+	{
+		mySN *aRunner=aHead;
+		aHead=(*aHead).aNext;
+		delete aRunner;
+	}
+}
+
+void printStack(mySN *aHead)
+{
+	if(aHead==NULL){//if aHead=NULL it means the die hasn't been rolled yet.
+		cout<<"The die hasn't been rolled yet. No record available\n";
+	}
+	else{
+	while(aHead!=NULL)
+	{//we print both the number of sides of the die and the result for the roll
+		cout<<setw(10)<<"Sides: "<<(*aHead).sides<<"   Roll: "<<(*aHead).roll<<endl;
+		aHead=(*aHead).aNext;
+	}
+}
+	cout<<endl;
+}
+
+void deleteStack(mySN * &aHead)
+{
+	while(aHead!=NULL)
+	{
+		mySN *aRunner=aHead;
+		aHead=(*aHead).aNext;
+		delete aRunner;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+class Die
+{
+	private:
+		int sides;
+		int roll;
+		mySN *logOfRolls;
+	public:
+		Die(int=6); //constructor sets default number of sides to 6
+		void setSides(int); //mutator prompts user to enter sides of the die
+		void setRoll(); //mutator uses random number generator to determine result of roll
+		int getSides() const; //accessor outputs sides in the die
+		int getRoll() const; //accessor outputs the die rolled
+		void getLogOfRolls() const; //to hold all the results of the die rolls
+		~Die(); //frees the memory used to store all die results
+};
+
+Die::Die(int s)
+{
+	sides=s;
+	logOfRolls=NULL; //the pointer to stack is set to NULL to indicate end of stack.
+	roll=-1; //-1 used an indicator die is not rolled
+}
+void Die::setSides(int s)
+{
+	sides=s;
+}
+void Die::setRoll()
+{
+	int seed=time(0); //seed is created using computer clock time to make rand random
+	srand(seed); //we seed rand 
+	roll=(rand()%(sides-0+1))+0; //we randomly select an integer from 0 to number of sides
+	logOfRolls=push(sides, roll, logOfRolls); //we add the result of the roll with the number of side to our stack
+}
+void Die::getLogOfRolls() const
+{
+	printStack(logOfRolls);
+}
+int Die::getSides() const
+{
+	return sides;
+}
+int Die::getRoll() const
+{
+	if(roll==-1){cout<<"Die hasn't been rolled yet. Default value outputted: ";
+		return roll;
+	}
+	else
+	return roll;
+}
+
+Die::~Die()
+{
+	deleteStack(logOfRolls); //destructor frees the memory 
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+
+int main()
+{
+	Die myDie; //we create a Die object
+	int choice;
+	cout<<"Welcome to a Roll the Die. Choose from the following: \n";
+	do //use do-while to show the menu options at least one time
+	{
+		cout<<"\n1. Set number of sides.\n";
+		cout<<"2. Roll die\n";
+		cout<<"3. What did we roll?\n";
+		cout<<"4. Print record of roll results\n";
+		cout<<"5. Quit\n";
+		cout<<"Enter choice: ";
+		
+		cin>>choice;
+		while(choice!=1 && choice !=2 && choice!=3 && choice!=4 && choice!=5)
+		{
+			cout<<"Invalid choice. Reenter: ";
+			cin>>choice;
+		}
+		
+		if(choice==1)
+		{
+			cout<<"Enter number of sides: ";
+			int s;
+			cin>>s;
+			myDie.setSides(s);
+		}
+		else if(choice==2)
+		{
+			cout<<"Rolling die...\n";
+			myDie.setRoll();
+		}
+		else if(choice==3)
+		{
+			cout<<"Number rolled: "<<myDie.getRoll()<<endl;
+		}
+		else if(choice==4)
+		{
+			myDie.getLogOfRolls();
+		}
+		else
+		{
+			return 0;
+		}
+	}while(choice!=5);
+}
