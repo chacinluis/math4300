@@ -1,0 +1,177 @@
+/* 
+The goal of this program is to show how to overload operators for a programmer created class.
+The class is named Date. It holds the date of a year. The program asks the user to enter a number of days
+into the future and calculates the fututre date. This program does not consider leap years. 
+The "+=" operator is overloaded to adjust for changes in days, months, and years to get the future date.
+
+The bigger task in this program is getting the required changes in days, months, and years to get the fututre date since
+the numbers of days inputted is randomly left to the user.
+*/
+
+#include<iostream>
+using namespace std;
+
+
+
+//class declaration
+class Date
+{
+    private:
+        int day;
+        int month;
+        int year;
+    public:
+        Date(int=1, int=1, int=2000); //class constructor. default constructor is 1/1/2000
+        void operator+=(int); // += overloaded
+ 
+        
+        void getDate() const; //accessor that display date in mm/dd/yyyy format
+};
+
+
+Date::Date(int m, int d, int y)
+{ 
+    //the constructor validates data inputted for the month, day, and year.
+    //if they are invalid based on the limits of day per each month, months in a year, and year value
+    //the constructor reverts to value to the default value
+    if(m>0 && m<13)
+        month=m;
+    else
+        month=1;
+    if(d>0 && (m==1 || m==3 || m==5 || m==7 || m==8 || m==10 || m==12) && d<32)
+        day=d;
+    else if(d>0 && (m==4 || m==6 || m==9 || m==11) && d<31)
+        day=d;
+    else if(d>0 && m==2 && d<30)
+        day=d; 
+    else
+        day=1;
+    if(y>0)
+        year=y;
+    else
+        year=2000;
+}
+
+
+
+void Date::operator+=(int x)
+{
+    year+=(x/365); //integer division of x and 365 gives us the number of times x goes into 365, and therefore 
+    //by how uch we should increase years.
+    
+    x=x%365; //modular division gives us the remainder number of days after total whole years in days has been reduced
+    
+    
+    //At this point we are left to change the date by a number of days this less than 365. So at most the year will change
+    //by an extra unit. The year change will be determined by changes in months performed. 
+    
+    bool success=true; //this boolean flag will help indicate when a month has been changed.
+    while(success)
+    {
+        if(month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12)
+        //if we are in Jan, Mar, May, July, Aug, Oct, or Dec
+        {
+            if(x-(31-day)>0) //checks to see if we have enough days left to move to the next month. These are 31 day months
+            {
+                if(month==12){month=1; ++year; x-=(31-day); day=0;} 
+                //if we are in Dec, then a month change also brings a year change
+                else{++month; x-=(31-day); day=0;} //if not in Dec, then we only change the month
+                //we reduce the days left by what was needed to complete the month
+            }
+            else{ day+=x; success=false;} 
+            //if there are not enough days to change the month, we only change the days in the month we are located
+            //no change in month signals we are done changing the date and we change the flag to false to exit the
+            //whie loop
+        }
+        
+        //same process as above but with months of 30 days
+        else if(month==4 || month==6 || month==9 || month==11)
+        {
+            if(x-(30-day)>0)
+                {x-=(30-day); ++month; day=0;}
+            else
+                {day+=x; success=false;}
+        }
+        
+        //same process as above for February
+        else
+        {
+            if(x-(28-day)>0)
+                {x-=(28-day); ++month; day=0;}
+            else
+                {day+=x; success=false;}
+        }
+    }
+    
+}
+
+
+
+void Date::getDate() const
+{ cout<<"Today is: "<<month<<"/"<<day<<"/"<<year<<endl;}
+
+
+
+int main()
+{
+
+    int tempDay, tempMonth, tempYear; //to hold day, month, and year provided by user
+
+        cout<<"Welcome to the future date calculator\n";
+        cout<<"Please enter today's date.\n";
+        cout<<"Month (1-12): ";
+        cin>>tempMonth;
+        if(tempMonth<1 || tempMonth>12){cout<<"Invalid input. Exit.\n"; return 0;}
+        
+        //checks for valid input of days for 31 day months
+        if(tempMonth==1 || tempMonth==3 || tempMonth==5 || tempMonth==7 || 
+        tempMonth==8 || tempMonth==10 || tempMonth==12)
+        {
+            cout<<"Day (1-31): ";
+            cin>>tempDay;
+            if(tempDay<1 || tempDay>31){cout<<"Invalid input. Exit.\n"; return 0;}
+        }
+        
+        //checks for valid input of days for 30 day months
+        else if(tempMonth==4 || tempMonth==6 || tempMonth==9 || tempMonth==11)
+        {
+            cout<<"Day (1-30): ";
+            cin>>tempDay;
+            if(tempDay<1 || tempDay>30){cout<<"Invalid input. Exit.\n"; return 0;}
+        }
+        
+        //checks for valid input of days for February
+        else
+        {
+            cout<<"Day (1-28): ";
+            cin>>tempDay;
+            if(tempDay<1 || tempDay>28){cout<<"Invalid input. Exit.\n"; return 0;}
+        }
+        
+        //validate year inputted
+        cout<<"Enter year (>0): ";
+        cin>>tempYear;
+        if(tempYear<0){cout<<"Invalid input. Exit.\n"; return 0;}
+        
+        
+        //we use constructor to create Date object
+        Date today(tempMonth, tempDay, tempYear);
+        
+        
+        //prompt user to enter days to get fututre date
+        cout<<"Enter x amount of days (>0) to go into the future: ";
+        int x;
+        cin>>x;
+        if(x<0){cout<<"Invalid input. Exit.\n"; return 0;}
+        
+        
+        //overloaded operator adjusts date based on x days entered
+        today+=x;
+        
+        
+        //displays fututre date in mm/dd/yyyy format
+        cout<<"The Future "; 
+        today.getDate();
+        
+    return 0;
+}
