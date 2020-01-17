@@ -24,7 +24,7 @@ class intArray
         
         int size() const; //accessor display size of array
         
-        const intArray operator=(const intArray &); //copy assignment
+        const intArray & operator=(const intArray &); //copy assignment
         
         int & operator[](const int &); //overloaded [] operator
         
@@ -55,7 +55,7 @@ intArray::intArray(const intArray &copyFrom)
         //we assign the same values to the array as the array in the referenced object.
 }
 
-const intArray intArray::operator=(const intArray &copyFrom)
+const intArray & intArray::operator=(const intArray &copyFrom)
 {
     arraySize=copyFrom.arraySize;
     
