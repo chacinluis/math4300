@@ -1,0 +1,124 @@
+/* We created an integer array class that does bounds checking in contrast to C++ built-in arrays.
+If the the user tries to access values stored in an intArray that are beyong the size of the array
+the program will display an error message and exit the program.
+*/
+
+
+
+#include <iostream>
+
+using namespace std;
+
+class intArray
+{
+    private:
+     int arraySize; //to store the array size
+     
+     int *arrayPtr; //to store the address to the first element in the array object
+     //we do not make it a const because we'll be changing the address it points to
+    
+    public:
+        intArray(const int=0); //constructor
+        
+        intArray(const intArray &); //copy constructor
+        
+        int size() const; //accessor display size of array
+        
+        const intArray operator=(const intArray &); //copy assignment
+        
+        int & operator[](const int &); //overloaded [] operator
+        
+        ~intArray(); //destructor
+};
+
+intArray::intArray(const int x)
+{
+    //arraySize is assigned the value passed to the constructor
+    arraySize=x; 
+    
+    //we create an integer array of the size given
+    arrayPtr=new int[x];
+    
+    for(int counter=0; counter<x;++counter)
+        arrayPtr[counter]=0; 
+        //we initialize every value in the integer array to 0
+}
+
+intArray::intArray(const intArray &copyFrom)
+{
+    arraySize=copyFrom.arraySize; //we use the same size as the object passed by reference
+    
+    arrayPtr=new int[arraySize]; //we create an array of the same size as the refrenced object
+    
+    for(int counter=0; counter<arraySize; ++counter)
+        arrayPtr[counter]=copyFrom.arrayPtr[counter]; 
+        //we assign the same values to the array as the array in the referenced object.
+}
+
+const intArray intArray::operator=(const intArray &copyFrom)
+{
+    arraySize=copyFrom.arraySize;
+    
+    delete [] arrayPtr; //here we delete the integer array that already exists in the object calling the 
+    //overloaded assignment operator
+    
+    arrayPtr=new int[arraySize];
+    for(int counter=0; counter<arraySize; ++counter)
+        arrayPtr[counter]=copyFrom.arrayPtr[counter];
+    return *this; 
+    //we return a refrence to the object calling the assignment operator, because we want
+    //the overloaded assignment operator to work when doing multiple consecutive assignments
+}
+
+int & intArray::operator[](const int &x)
+{
+    //we check if the user tries to access values beyond the size of the integer array
+    if(x<0 || x>(arraySize-1)) 
+    {
+        cout<<"array subscript is out of bounds\n";
+        exit(0); //if so we quit program after a error message
+    }
+    
+    return arrayPtr[x]; 
+    //if the bounds are fine we return a reference to the value stored in position x in the array
+    //Why a refrence? Because we would like statements like obj1[0]=10; to work.
+    //remember the built-in assignment operator in C++ requires an lvalue to be in the left of the assignment oeprator.
+    //An lvalue is a modifiable memory location. If we returned a plain integer that wouldn't be an lvalue. It would be
+    //a literal, and therefore not modifiable.
+}
+
+
+int intArray::size() const
+{
+    return arraySize; //display array size
+}
+
+intArray::~intArray()
+{
+    delete [] arrayPtr; //frees the memory when the objects are destroyed to avoid memory leak;
+}
+
+
+
+
+int main()
+{
+    intArray obj1(3), obj2(2); 
+    //we create intArray objects using constructor
+    
+    obj1[0]=10; obj1[1]=20; obj1[2]=30; 
+    //we assign values to them
+    
+    obj2[0]=100; obj2[1]=200;
+    
+    obj1[0]=obj2[1]=obj1[2]; 
+    //we show how the overloaded [] operator works with multiple assignment 
+    
+    cout<<obj1[0]<<" "<<obj2[1]<<" "<<obj1[2]<<endl; 
+    //we display the values
+    
+    cout<<obj1[4]<<endl; 
+    //we show how bounds checking is performed
+    
+    return 0;
+}
