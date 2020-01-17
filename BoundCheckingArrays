@@ -3,11 +3,20 @@ If the the user tries to access values stored in an intArray that are beyong the
 the program will display an error message and exit the program.
 */
 
+/* we also overloaded the output stream operator "<<" to display arrays completely without having to use loops */
 
 
 #include <iostream>
 
 using namespace std;
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Class declaration
 
 class intArray
 {
@@ -18,18 +27,35 @@ class intArray
      //we do not make it a const because we'll be changing the address it points to
     
     public:
-        intArray(const int=0); //constructor
+        intArray(const int=0); 
+        //constructor
         
-        intArray(const intArray &); //copy constructor
+        intArray(const intArray &); 
+        //copy constructor
         
-        int size() const; //accessor display size of array
+        int size() const; 
+        //accessor display size of array
         
-        intArray & operator=(const intArray &); //copy assignment
+        intArray & operator=(const intArray &); 
+        //copy assignment
         
-        int & operator[](const int &); //overloaded [] operator
+        int & operator[](const int &); 
+        //overloaded [] operator
+        
+        friend ostream & operator<<(ostream &, const intArray &);
+        //we make the overloaded "<<" operator a friend function so we can access the private members in the
+        //intArray argument
+        
         
         ~intArray(); //destructor
 };
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Class implementation
 
 intArray::intArray(const int x)
 {
@@ -100,6 +126,26 @@ intArray::~intArray()
 
 
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+ostream & operator<<(ostream &outStream, const intArray &x)
+{
+    for(int counter=0; counter<x.arraySize; ++counter)
+        cout<<x.arrayPtr[counter]<<" ";
+        //since x operator<< is a friend function of the intArray class we have access to private members
+    return outStream;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 
 int main()
 {
@@ -115,7 +161,10 @@ int main()
     //we show how the overloaded [] operator works with multiple assignment 
     
     cout<<obj1[0]<<" "<<obj2[1]<<" "<<obj1[2]<<endl; 
-    //we display the values
+    //we display individual  values
+    
+    cout<<obj1<<endl<<obj2<<endl;
+    //we display the arrays completely using overloaded "<<"
     
     cout<<obj1[4]<<endl; 
     //we show how bounds checking is performed
