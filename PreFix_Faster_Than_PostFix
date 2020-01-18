@@ -1,0 +1,55 @@
+/*
+Professor Matic will repeat a gazillion times that prefix increment is 60 times faster than postfix increment.
+He will also say that a true programmer avoids using postfix increment as much as possible. 
+But why?
+Here we answer this question
+*/
+
+
+//The following is an extension of the FeetInches class written on another link in my gitHub
+
+/* c++ allows us to overload the prefix and postfix increment operators. Here is an example written
+for the FeetInches class. FeetInches objects have feet and inches as there private memebers.
+*/
+
+FeetInches & FeetInches::operator++()
+{
+    ++inches;
+    feet+=(inches/12);
+    inches=inches%12;
+    return *this;
+}
+
+
+FeetInches FeetInches::operator++(int) 
+//the int parameter is a dummy parameter that tells the compiler this is the postfix overload
+{
+    FeetInches tempObj(feet, inches);
+    ++inches;
+    feet+=(inches/12);
+    inches=inches%12;
+    return tempObj;
+}
+
+*/
+Notice in the postfix overload that in order for us to return an unchanged object and then increment 
+the object,in the process we need to create a copy of the object calling the operator function. This is not 
+necessary in the prefix version.
+This alone takes more memory and more execution time to process. Also imagine our class had data structures 
+as private members. Using copy constructor to create the duplicate object would take a lot of time creating a 
+new data structure and copying the entire content.
+Also notice in the postfix version that we have to return  by value and not by reference. Why? 
+Because the return object is a local object, and therefore we can't return by reference. 
+This will require copy or move constructor to create a temp object, copy or move assignment to assign 
+the temp object to the object calling the operator function, and then destructors for the temp object 
+and the return object in the postfix function.
+My goodness is that a lot.
+Prefix operator returns by reference. No return temp object is needed in the return process therefore 
+copy or move constructor nor copy or move assignment are called. This saves significant amounts of 
+execution time and memory.
+
+This is why prefix increment is used by true programmers. So the next time you look at online code 
+with postfix increment  from a person claiming to be a programmer, 
+tell that person "yeah sure *cough* bullshit"
+*/
+
